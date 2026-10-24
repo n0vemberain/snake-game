@@ -1,0 +1,316 @@
+/* 
+ ============================================================================
+ 🎮 নিয়ন স্নেক গেম - আধুনিক সিএসএস স্টাইলশীট (Modern CSS3 Architecture)
+ ============================================================================
+ এই স্টাইলশীটে রয়েছে:
+   ১. ৫টি স্বতন্ত্র কালার থিম ভেরিয়েবল (Cyberpunk, Synthwave, Gameboy, Matrix, Midnight)
+   ২. নিয়ন গ্লো, ব্যাকগ্রাউন্ড গ্রিড এবং আর্কেড অ্যানিমেশন
+   ৩. ফ্লেক্সিবল ও রেসপনসিভ ক্যানভাস লেআউট
+   ৪. গ্লাস-মর্ফিজম (Glassmorphism) প্যানেল ডিজাইন
+   ৫. ইন্টারেক্টিভ স্কোরবোর্ড, ওভারলে স্ক্রিন এবং আর্কেড বাটন স্টাইলিং
+   ৬. মোবাইল টাচ D-Pad কন্ট্রোলার ইন্টারফেস
+ ============================================================================
+*/
+
+/* --------------------------------------------------------------------------
+   ১. থিম ভেরিয়েবলসমূহ (CSS Custom Properties)
+   -------------------------------------------------------------------------- */
+:root {
+  /* প্রাথমিক সাইবারপাঙ্ক নিয়ন থিম */
+  --bg-color: #0d0f18;
+  --bg-grid-color: rgba(0, 240, 255, 0.05);
+  --card-bg: rgba(20, 24, 38, 0.85);
+  --card-border: rgba(0, 240, 255, 0.25);
+  --primary-color: #00f0ff;
+  --primary-glow: rgba(0, 240, 255, 0.45);
+  --secondary-color: #ff0077;
+  --secondary-glow: rgba(255, 0, 119, 0.45);
+  --accent-color: #ffe600;
+  --accent-glow: rgba(255, 230, 0, 0.45);
+  --snake-head: #00f0ff;
+  --snake-body: #05d5e3;
+  --snake-tail: #019aa5;
+  --food-apple: #ff0055;
+  --food-golden: #ffd700;
+  --food-speed: #00f0ff;
+  --food-ghost: #b537f2;
+  --food-slow: #3b82f6;
+  --text-main: #f0f4f8;
+  --text-muted: #8b9bb4;
+  --canvas-bg: #090b12;
+  --canvas-border: #00f0ff;
+  --font-display: 'Orbitron', 'Rajdhani', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-pixel: 'VT323', monospace;
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* সিন্থওয়েভ ১৯৮০s থিম */
+[data-theme="synthwave"] {
+  --bg-color: #1a0826;
+  --bg-grid-color: rgba(255, 113, 206, 0.06);
+  --card-bg: rgba(38, 12, 54, 0.85);
+  --card-border: rgba(255, 113, 206, 0.3);
+  --primary-color: #ff71ce;
+  --primary-glow: rgba(255, 113, 206, 0.45);
+  --secondary-color: #01cdfe;
+  --secondary-glow: rgba(1, 205, 254, 0.45);
+  --accent-color: #05ffa1;
+  --accent-glow: rgba(5, 255, 161, 0.45);
+  --snake-head: #ff71ce;
+  --snake-body: #e05ab2;
+  --snake-tail: #b33989;
+  --canvas-bg: #12041c;
+  --canvas-border: #ff71ce;
+}
+
+/* রেট্রো গেমবয় গ্রিন থিম */
+[data-theme="gameboy"] {
+  --bg-color: #8b956d;
+  --bg-grid-color: rgba(15, 56, 15, 0.07);
+  --card-bg: rgba(155, 168, 123, 0.9);
+  --card-border: rgba(15, 56, 15, 0.35);
+  --primary-color: #1a4314;
+  --primary-glow: rgba(26, 67, 20, 0.3);
+  --secondary-color: #2e6125;
+  --secondary-glow: rgba(46, 97, 37, 0.3);
+  --accent-color: #0f380f;
+  --accent-glow: rgba(15, 56, 15, 0.3);
+  --snake-head: #0f380f;
+  --snake-body: #1a4314;
+  --snake-tail: #2e6125;
+  --text-main: #0f380f;
+  --text-muted: #2e6125;
+  --canvas-bg: #9bbc0f;
+  --canvas-border: #0f380f;
+}
+
+/* দ্য ম্যাট্রিক্স হ্যাকার থিম */
+[data-theme="matrix"] {
+  --bg-color: #020b02;
+  --bg-grid-color: rgba(0, 255, 65, 0.05);
+  --card-bg: rgba(5, 20, 5, 0.85);
+  --card-border: rgba(0, 255, 65, 0.25);
+  --primary-color: #00ff41;
+  --primary-glow: rgba(0, 255, 65, 0.4);
+  --secondary-color: #008f11;
+  --secondary-glow: rgba(0, 143, 17, 0.4);
+  --accent-color: #bbf7d0;
+  --accent-glow: rgba(187, 247, 208, 0.4);
+  --snake-head: #00ff41;
+  --snake-body: #00c732;
+  --snake-tail: #008f11;
+  --canvas-bg: #010601;
+  --canvas-border: #00ff41;
+}
+
+/* মিডনাইট মিনিমাল ডার্ক থিম */
+[data-theme="midnight"] {
+  --bg-color: #0a0b0e;
+  --bg-grid-color: rgba(255, 255, 255, 0.03);
+  --card-bg: rgba(22, 24, 30, 0.85);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --primary-color: #6366f1;
+  --primary-glow: rgba(99, 102, 241, 0.4);
+  --secondary-color: #ec4899;
+  --secondary-glow: rgba(236, 72, 153, 0.4);
+  --accent-color: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.4);
+  --snake-head: #818cf8;
+  --snake-body: #6366f1;
+  --snake-tail: #4f46e5;
+  --canvas-bg: #07080a;
+  --canvas-border: #6366f1;
+}
+
+/* --------------------------------------------------------------------------
+   ২. ইউনিভার্সাল রিসেট এবং বেস স্টাইলিং
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ব্যাকগ্রাউন্ড অ্যানিমেটেড গ্রিড এফেক্ট */
+.cyber-background-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: 
+    linear-gradient(var(--bg-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid-color) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center center;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.ambient-glow {
+  position: fixed;
+  top: -10vw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70vw;
+  height: 35vw;
+  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+  opacity: 0.25;
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+  transition: background 0.5s ease;
+}
+
+/* স্ক্রিন রিডার শুধুমাত্র ক্লাস */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   ৩. প্রধান লেআউট কন্টেইনার (Game Wrapper)
+   -------------------------------------------------------------------------- */
+.game-wrapper {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   ৪. হেডার এবং ব্র্যান্ডিং বার
+   -------------------------------------------------------------------------- */
+.arcade-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.game-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 10px var(--primary-glow));
+  animation: float-icon 3s ease-in-out infinite;
+}
+
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.glitch-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--primary-color);
+  text-shadow: 0 0 12px var(--primary-glow);
+  line-height: 1.1;
+}
+
+.sub-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* আইকন বাটন স্টাইল */
+.btn-icon {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-icon:hover {
+  background: var(--primary-glow);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.btn-icon:active {
+  transform: translateY(0);
+}
+
+/* কাস্টম থিম সিলেক্টর */
+.theme-picker-wrapper select {
+  background: rgba(10, 12, 20, 0.9);
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.theme-picker-wrapper select:hover,
+.theme-picker-wrapper select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 10px var(--primary-glow);
+}

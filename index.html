@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <!-- 
+    ============================================================================
+    🐍 ক্লাসিক ও আধুনিক স্নেক গেম (Arcade Snake Game Web Edition)
+    ============================================================================
+    এই ফাইলটিতে স্নেক গেমের মূল HTML কাঠামো (DOM Structure) সংজ্ঞায়িত করা হয়েছে।
+    এতে রয়েছে:
+      ১. নিয়ন আর্কেড থিমযুক্ত হেডার এবং সেটিংস প্যানেল
+      ২. রিয়েল-টাইম স্কোরবোর্ড এবং স্ট্যাটাস ডিসপ্লে
+      ৩. হাই-রেজোলিউশন HTML5 ক্যানভাস কনটেইনার
+      ৪. গেম ওভার, পজ এবং স্টার্ট স্ক্রিন ওভারলে
+      ৫. মোবাইল এবং টাচ ডিভাইসের জন্য অন-স্ক্রিন ভার্চুয়াল কন্ট্রোলার (D-Pad)
+      ৬. বিভিন্ন গেম মোড ও ডিফিকাল্টি সিলেকশন টুলবার
+      ৭. অর্জন (Achievements) এবং সহায়িকা (How to play) মডাল ডায়ালগ
+    ============================================================================
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="একটি আধুনিক ও চোখজুড়ানো ওয়েব-ভিত্তিক স্নেক গেম। নিয়ন গ্রাফিক্স, বিভিন্ন গেম মোড, সাউন্ড ইফেক্টস এবং মোবাইল কন্ট্রোল সহ।">
+  <meta name="theme-color" content="#0d0f18">
+  <title>🐍 নিয়ন স্নেক - Modern Arcade Snake Game</title>
+
+  <!-- গুগল ফন্টস (আর্কেড ও সাইবারপাঙ্ক লুকের জন্য) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- ফেভিকন (SVG ডেটা ইউআরআই) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+
+  <!-- গেমের মূল স্টাইলশীট -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="cyberpunk">
+  <!-- ব্যাকগ্রাউন্ড অ্যানিমেটেড গ্রিড এফেক্ট -->
+  <div class="cyber-background-grid" aria-hidden="true"></div>
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- মূল অ্যাপ কন্টেইনার -->
+  <main class="game-wrapper" role="main">
+    
+    <!-- শীর্ষ হেডার: ব্র্যান্ডিং এবং কুইক অ্যাকশন বোতাম -->
+    <header class="arcade-header">
+      <div class="header-brand">
+        <span class="game-icon" aria-hidden="true">🐍</span>
+        <div class="brand-text">
+          <h1 class="glitch-title" data-text="NEON SNAKE">NEON SNAKE</h1>
+          <span class="sub-title">সাইবার আর্কেড এডিশন</span>
+        </div>
+      </div>
+
+      <!-- কুইক কন্ট্রোল টুলস (সাউন্ড, থিম, গাইড, ফুলস্ক্রিন) -->
+      <div class="header-tools" role="toolbar" aria-label="গেম সেটিংস ও কন্ট্রোল">
+        <!-- সাউন্ড টগল বাটন -->
+        <button id="btn-sound" class="btn-icon" aria-label="শব্দ চালু বা বন্ধ করুন" title="সাউন্ড টগল (M)">
+          <span class="icon icon-sound-on">🔊</span>
+          <span class="icon icon-sound-off hidden">🔇</span>
+        </button>
+
+        <!-- থিম সিলেক্টর ড্রপডাউন -->
+        <div class="theme-picker-wrapper">
+          <label for="theme-select" class="sr-only">থিম নির্বাচন করুন</label>
+          <select id="theme-select" class="custom-select" title="গ্রাফিক্স থিম পরিবর্তন">
+            <option value="cyberpunk">⚡ সাইবার নিয়ন</option>
+            <option value="synthwave">🌆 সিন্থওয়েভ ৮০s</option>
+            <option value="gameboy">👾 রেট্রো গেমবয়</option>
+            <option value="matrix">💻 দ্য ম্যাট্রিক্স</option>
+            <option value="midnight">🌙 মিডনাইট ডার্ক</option>
+          </select>
+        </div>
+
+        <!-- সহায়তা / রুলস বাটন -->
+        <button id="btn-help" class="btn-icon" aria-label="কিভাবে খেলবেন নির্দেশিকা" title="নিয়মাবলী ও কিবোর্ড শর্টকাট (?)">
+          <span class="icon">❓</span>
+        </button>
+
+        <!-- ফুলস্ক্রিন টগল বাটন -->
+        <button id="btn-fullscreen" class="btn-icon" aria-label="সম্পূর্ণ স্ক্রিন প্রদর্শন" title="ফুলস্ক্রিন মোড">
+          <span class="icon">⛶</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- স্ট্যাটাস ড্যাশবোর্ড: বর্তমান স্কোর, হাই স্কোর, লেভেল ও খাদ্য সংখ্যা -->
+    <section class="stats-bar" aria-label="খেলার পরিসংখ্যান">
+      <div class="stat-card stat-score">
+        <span class="stat-label">বর্তমান স্কোর</span>
+        <div class="stat-value-box">
+          <span id="score-display" class="stat-value">0</span>
+          <span id="score-increment" class="score-popup">+10</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-highscore">
+        <span class="stat-label">সর্বোচ্চ স্কোর 🏆</span>
+        <span id="highscore-display" class="stat-value">0</span>
+      </div>
+
+      <div class="stat-card stat-level">
+        <span class="stat-label">লেভেল / গতি</span>
+        <span id="level-display" class="stat-value">LVL 1</span>
+      </div>
+
+      <div class="stat-card stat-food">
+        <span class="stat-label">খাদ্য সংগৃহীত</span>
+        <span id="food-count-display" class="stat-value">0 🍎</span>
+      </div>
+    </section>
+
+    <!-- পাওয়ার-আপ বাফার টাইমার প্রগ্রেস বার (যখন বিশেষ খাবার খাওয়া হয়) -->
+    <div id="powerup-bar-container" class="powerup-bar-container hidden" aria-live="polite">
+      <div class="powerup-info">
+        <span id="powerup-icon">⚡</span>
+        <span id="powerup-title">স্পিড বুস্ট সক্রিয়!</span>
+      </div>
+      <div class="powerup-progress-track">
+        <div id="powerup-progress-fill" class="powerup-progress-fill" style="width: 100%;"></div>
+      </div>
+    </div>
+
+    <!-- গেমপ্লে এরিয়া (ক্যানভাস এবং ওভারলে স্ক্রিনসমূহ) -->
+    <section class="canvas-container" id="canvas-container">
+      <!-- মূল HTML5 রেন্ডারিং ক্যানভাস -->
+      <canvas id="game-canvas" width="600" height="600" aria-label="স্নেক গেম ক্যানভাস"></canvas>
+
+      <!-- স্ক্রিন ১: গেম শুরুর ওয়েলকাম ওভারলে -->
+      <div id="overlay-start" class="canvas-overlay overlay-active">
+        <div class="overlay-card">
+          <div class="hero-badge">ARCADE EDITION</div>
+          <h2 class="overlay-title">স্নেক গেম শুরু করুন</h2>
+          <p class="overlay-desc">তীর চিহ্ন (Arrow Keys) অথবা W-A-S-D দিয়ে সাপকে নিয়ন্ত্রণ করুন। খাবার খেয়ে লেজ লম্বা করুন এবং দেয়াল বা নিজের শরীরে ধাক্কা খাওয়া এড়িয়ে চলুন!</p>
+          
+          <div class="mode-preview-tags">
+            <span class="tag">🎮 ৪টি ভিন্ন মোড</span>
+            <span class="tag">⚡ পাওয়ার-আপস</span>
+            <span class="tag">🏆 অর্জনসমূহ</span>
+          </div>
+
+          <button id="btn-start-game" class="btn-cta">
+            <span class="cta-pulse"></span>
+            খেলতে শুরু করুন [SPACE]
+          </button>
+        </div>
+      </div>
+
+      <!-- স্ক্রিন ২: খেলা বিরতি (পজ) ওভারলে -->
+      <div id="overlay-pause" class="canvas-overlay hidden">
+        <div class="overlay-card">
+          <div class="pause-icon">⏸️</div>
+          <h2 class="overlay-title">খেলা সাময়িক বিরতি</h2>
+          <p class="overlay-desc">খেলা পুনরায় চালু করতে 'SPACE' চাপুন অথবা নিচের বোতামে ক্লিক করুন।</p>
+          <div class="overlay-buttons">
+            <button id="btn-resume-game" class="btn-cta">চালু রাখুন [SPACE]</button>
+            <button id="btn-restart-from-pause" class="btn-secondary">নতুন করে শুরু করুন</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- স্ক্রিন ৩: গেম ওভার ওভারলে -->
+      <div id="overlay-gameover" class="canvas-overlay hidden">
+        <div class="overlay-card gameover-card">
+          <div class="skull-icon">💀</div>
+          <h2 class="overlay-title gameover-title">গেম ওভার!</h2>
+          <p id="gameover-reason" class="gameover-reason">দেয়ালের সাথে ধাক্কা লেগেছে!</p>
+
+          <div class="gameover-summary">
+            <div class="summary-item">
+              <span class="sum-label">অর্জিত স্কোর</span>
+              <span id="final-score" class="sum-val">0</span>
+            </div>
+            <div class="summary-item">
+              <span class="sum-label">সাপের দৈর্ঘ্য</span>
+              <span id="final-length" class="sum-val">3</span>
+            </div>
+            <div class="summary-item">
+              <span class="sum-label">খেলার সময়</span>
+              <span id="final-time" class="sum-val">00:00</span>
+            </div>
+          </div>
+
+          <div id="new-highscore-badge" class="new-highscore-badge hidden">
+            ✨ নতুন রেকর্ড! আপনি সর্বোচ্চ স্কোর ভেঙেছেন! ✨
+          </div>
+
+          <div class="overlay-buttons">
+            <button id="btn-retry-game" class="btn-cta">আবার খেলুন [SPACE/R]</button>
+            <button id="btn-share-score" class="btn-secondary">স্কোর শেয়ার করুন 📤</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- মোবাইল ও টাচ স্ক্রিন ডিভাইসের জন্য অন-স্ক্রিন কন্ট্রোলার -->
+    <section class="touch-controls" id="touch-controls" aria-label="টাচস্ক্রিন কন্ট্রোল বাটন">
+      <div class="dpad-container">
+        <button id="touch-up" class="dpad-btn dpad-up" aria-label="উপরে যান">▲</button>
+        <div class="dpad-middle-row">
+          <button id="touch-left" class="dpad-btn dpad-left" aria-label="বামে যান">◀</button>
+          <div class="dpad-center"></div>
+          <button id="touch-right" class="dpad-btn dpad-right" aria-label="ডানে যান">▶</button>
+        </div>
+        <button id="touch-down" class="dpad-btn dpad-down" aria-label="নিচে যান">▼</button>
+      </div>
+      <div class="touch-actions">
+        <button id="touch-pause" class="action-btn" aria-label="বিরতি নিন">⏸️</button>
+        <button id="touch-restart" class="action-btn" aria-label="পুনরায় শুরু করুন">🔄</button>
+      </div>
+    </section>
+
+    <!-- নিচের সেটিংস প্যানেল: মোড নির্বাচন, ডিফিকাল্টি ও দেয়াল পারাপার অপশন -->
+    <section class="controls-panel" aria-label="গেম সেটিংস ও মোড">
+      <div class="settings-group">
+        <span class="group-title">গেম মোড:</span>
+        <div class="button-toggle-group" id="mode-buttons">
+          <button class="mode-btn active" data-mode="classic">ক্লাসিক</button>
+          <button class="mode-btn" data-mode="campaign">লেভেলস</button>
+          <button class="mode-btn" data-mode="speedrun">স্পিড রান</button>
+          <button class="mode-btn" data-mode="portals">পোর্টালস</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <span class="group-title">গতি / কাঠিন্য:</span>
+        <div class="button-toggle-group" id="difficulty-buttons">
+          <button class="diff-btn" data-speed="140">সহজ</button>
+          <button class="diff-btn active" data-speed="100">স্বাভাবিক</button>
+          <button class="diff-btn" data-speed="65">কঠিন</button>
+          <button class="diff-btn" data-speed="40">ভয়ানক</button>
+        </div>
+      </div>
+
+      <div class="settings-group settings-switches">
+        <label class="switch-container">
+          <input type="checkbox" id="toggle-walls" checked>
+          <span class="switch-slider"></span>
+          <span class="switch-label">দেয়াল বাধা (Border Collision)</span>
+        </label>
+        <label class="switch-container">
+          <input type="checkbox" id="toggle-particles" checked>
+          <span class="switch-slider"></span>
+          <span class="switch-label">কণা ইফেক্ট (Particles FX)</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- কীবোর্ড শর্টকাট ফুটার গাইড -->
+    <footer class="arcade-footer">
+      <div class="key-hints">
+        <span class="key-badge">W/A/S/D</span> বা <span class="key-badge">↑/←/↓/→</span> সরানো
+        • <span class="key-badge">SPACE</span> পজ / চালু
+        • <span class="key-badge">R</span> রিস্টার্ট
+        • <span class="key-badge">M</span> সাউন্ড মিউট
+      </div>
+    </footer>
+  </main>
+
+  <!-- সহায়তা ও অর্জন ডায়ালগ (Modal Dialog) -->
+  <dialog id="help-modal" class="custom-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">📖 গেমের নিয়ম ও অর্জন নির্দেশিকা</h3>
+        <button id="btn-close-modal" class="btn-close" aria-label="বন্ধ করুন">✕</button>
+      </div>
+      <div class="modal-body">
+        <h4>🍎 খাবারের ধরন ও পয়েন্ট:</h4>
+        <ul class="food-legend">
+          <li><span class="food-sample food-apple"></span> <strong>সাধারণ আপেল:</strong> ১০ পয়েন্ট ও ১ ঘর দৈর্ঘ্য বৃদ্ধি</li>
+          <li><span class="food-sample food-golden"></span> <strong>সোনালী আপেল:</strong> ৫০ পয়েন্ট (নির্দিষ্ট সময় পর উধাও হয়)</li>
+          <li><span class="food-sample food-speed"></span> <strong>স্পিড থান্ডার:</strong> ৫ সেকেন্ডের জন্য ডাবল গতি ও বোনাস</li>
+          <li><span class="food-sample food-ghost"></span> <strong>ঘোস্ট বেরি:</strong> দেয়াল ও নিজের শরীরে আঘাতমুক্ত থাকার ক্ষমতা</li>
+          <li><span class="food-sample food-slow"></span> <strong>আইস ক্রিস্টাল:</strong> সাপকে ধীরগতির করে নিয়ন্ত্রণে সুবিধা প্রদান</li>
+        </ul>
+
+        <h4>🎮 বিভিন্ন গেম মোড:</h4>
+        <p><strong>১. ক্লাসিক:</strong> চিরাচরিত স্নেক অভিজ্ঞতা, যেখানে কেবল আপনি আর খাবার।</p>
+        <p><strong>২. লেভেলস:</strong> প্রতি ৫টি খাবারে একটি নতুন লেভেল ও নতুন বাধার আবির্ভাব ঘটে।</p>
+        <p><strong>৩. স্পিড রান:</strong> ঘড়ির কাঁটার বিরুদ্ধে লড়াই! নির্ধারিত সময়ে যত বেশি সম্ভব খাবার খেতে হবে।</p>
+        <p><strong>৪. পোর্টালস:</strong> স্ক্রিনের দুই প্রান্তের রহস্যময় পোর্টাল দিয়ে সাপের টেলিপোর্টেশন।</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-modal-ok" class="btn-cta">বুঝেছি, খেলা শুরু করি!</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- অর্জনের টোস্ট নোটিফিকেশন ব্যানার -->
+  <div id="achievement-toast" class="achievement-toast hidden" role="status" aria-live="polite">
+    <div class="achievement-icon">🏆</div>
+    <div class="achievement-details">
+      <div class="achievement-title">নতুন অর্জন আনলক!</div>
+      <div id="achievement-desc" class="achievement-desc">প্রথম খাবার ভক্ষণ</div>
+    </div>
+  </div>
+
+  <!-- গেমের জাভাস্ক্রিপ্ট মডিউলসমূহ -->
+  <script src="audio.js"></script>
+  <script src="particles.js"></script>
+  <script src="snake.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
