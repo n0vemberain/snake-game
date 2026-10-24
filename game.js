@@ -520,4 +520,503 @@ class NeonSnakeGame {
     this.animationFrameId = requestAnimationFrame((ts) => this.gameLoop(ts));
   }
 
+  /**
+   * গেমের প্রতিটি একক মুভমেন্ট টিক (Game Logic Step)
+   */
+  tick() {
+    // সাপ এক ঘর সরানো
+    const moveResult = this.snake.move(!this.allowWalls);
+
+    // ১. দেয়াল বা নিজের শরীরে আঘাত লাগলে গেম ওভার
+    if (moveResult.hitWall) {
+      this.gameOver('দেয়ালের সাথে সজোরে ধাক্কা লেগেছে!');
+      return;
+    }
+    if (moveResult.hitSelf) {
+      this.gameOver('সাপ নিজের শরীরে কামড় দিয়েছে!');
+      return;
+    }
+
+    const head = this.snake.body[0];
+
+    // ২. অবস্ট্যাকল (বাধা) সংঘর্ষ চেক
+    if (!this.snake.isGhost) {
+      const hitObstacle = this.obstacles.some(obs => obs.x === head.x && obs.y === head.y);
+      if (hitObstacle) {
+        this.gameOver('শক্ত বাধার সাথে ধাক্কা লেগেছে!');
+        return;
+      }
+    } else {
+      // ঘোস্ট মোডে বাধা পার হলে বিশেষ অর্জন
+      const passedObstacle = this.obstacles.some(obs => obs.x === head.x && obs.y === head.y);
+      if (passedObstacle) {
+        this.unlockAchievement('ghost_walker', 'অমর আত্মা: বাধার ভেতর দিয়ে নিরাপদে গমন!');
+      }
+    }
+
+    // ৩. পোর্টাল টেলিপোর্টেশন চেক
+    if (this.currentMode === 'portals') {
+      this.portals.forEach(portal => {
+        if (head.x === portal.in.x && head.y === portal.in.y) {
+          head.x = portal.out.x;
+          head.y = portal.out.y;
+          window.arcadeAudio.playPortal();
+          window.particleSystem.createPortalBurst(portal.out.x * this.cellSize + this.cellSize / 2, portal.out.y * this.cellSize + this.cellSize / 2, portal.colorOut);
+          window.screenShake.trigger(6, 200);
+          this.portalTeleports++;
+          if (this.portalTeleports >= 5) {
+            this.unlockAchievement('portal_hopper', 'পোর্টাল মাস্টার: ৫ বার সফল টেলিপোর্ট সম্পন্ন!');
+          }
+        }
+      });
+    }
+
+    // ৪. সাধারণ খাবার গ্রহণ চেক
+    if (this.foodManager.currentFood && head.x === this.foodManager.currentFood.x && head.y === this.foodManager.currentFood.y) {
+      this.handleEatNormalFood();
+    }
+
+    // ৫. বিশেষ পাওয়ার-আপ খাবার গ্রহণ চেক
+    if (this.foodManager.specialFood && head.x === this.foodManager.specialFood.x && head.y === this.foodManager.specialFood.y) {
+      this.handleEatSpecialFood();
+    }
+
+    // সাপের চলার পথে মৃদু ট্রেইল কণা তৈরি
+    const headPx = head.x * this.cellSize + this.cellSize / 2;
+    const headPy = head.y * this.cellSize + this.cellSize / 2;
+    window.particleSystem.createTrail(headPx, headPy, this.themeColors.head);
+  }
+
+  /**
+   * সাধারণ খাদ্য খাওয়ার লজিক
+   */
+  handleEatNormalFood() {
+    const food = this.foodManager.currentFood;
+    const px = food.x * this.cellSize + this.cellSize / 2;
+    const py = food.y * this.cellSize + this.cellSize / 2;
+
+    this.snake.grow(food.grow);
+    this.addScore(food.points);
+    this.foodEaten++;
+
+    window.arcadeAudio.playEat();
+    window.particleSystem.createFoodBurst(px, py, 'normal');
+    window.screenShake.trigger(4, 150);
+
+    // প্রথম অর্জনের চেক
+    this.unlockAchievement('first_bite', 'প্রথম পদক্ষেপ: সফলভাবে প্রথম খাবার সংগ্রহ!');
+
+    if (this.snake.body.length >= 15) {
+      this.unlockAchievement('centipede', 'সেন্টিপিড: সাপের দৈর্ঘ্য ১৫ অতিক্রম করেছে!');
+    }
+
+    // লেভেলস মোডে পরবর্তী লেভেল
+    if (this.currentMode === 'campaign' && this.foodEaten % 5 === 0) {
+      this.levelUp();
+    }
+
+    // মাঝে মাঝে বিশেষ খাবার স্পন (২৫% সম্ভাবনা)
+    if (Math.random() < 0.28) {
+      this.foodManager.spawnSpecialFood(this.snake, this.obstacles, this.portals);
+    }
+
+    // নতুন সাধারণ খাবার তৈরি
+    this.foodManager.spawnNormalFood(this.snake, this.obstacles, this.portals);
+    this.updateScoreUI();
+  }
+
+  /**
+   * বিশেষ পাওয়ার খাদ্য খাওয়ার লজিক
+   */
+  handleEatSpecialFood() {
+    const sp = this.foodManager.specialFood;
+    const px = sp.x * this.cellSize + this.cellSize / 2;
+    const py = sp.y * this.cellSize + this.cellSize / 2;
+
+    this.addScore(sp.points);
+    window.particleSystem.createFoodBurst(px, py, sp.type);
+    window.screenShake.trigger(8, 250);
+
+    if (sp.type === 'golden') {
+      window.arcadeAudio.playGolden();
+      this.goldenEaten++;
+      if (this.goldenEaten >= 3) {
+        this.unlockAchievement('golden_hunter', 'সোনার হরিণ: ৩টি সোনালী আপেল ভক্ষণ সম্পন্ন!');
+      }
+    } else {
+      window.arcadeAudio.playPowerup();
+      this.activatePowerup(sp.type, 7000); // ৭ সেকেন্ডের জন্য পাওয়ার
+    }
+
+    this.foodManager.specialFood = null;
+    this.updateScoreUI();
+  }
+
+  /**
+   * বিশেষ পাওয়ার-আপ বাফার সক্রিয় করা
+   */
+  activatePowerup(type, duration) {
+    this.activePowerup = {
+      type: type,
+      startTime: performance.now(),
+      duration: duration
+    };
+
+    if (type === 'speed') {
+      this.snake.isSpeedBoosted = true;
+      this.currentSpeed = Math.max(35, this.baseSpeed * 0.55); // ডাবল দ্রুত
+      this.showPowerupBar('⚡ স্পিড বুস্ট সক্রিয়!', '⚡');
+      this.unlockAchievement('speed_demon', 'গতি দানব: আলোর গতিতে ধাবমান!');
+    } else if (type === 'ghost') {
+      this.snake.isGhost = true;
+      this.showPowerupBar('👻 ঘোস্ট মোড: আপনি আঘাতমুক্ত!', '👻');
+    } else if (type === 'slow') {
+      this.snake.isSlowed = true;
+      this.currentSpeed = this.baseSpeed * 1.5; // ধীর ও সহজ নিয়ন্ত্রণ
+      this.showPowerupBar('❄️ আইস ক্রিস্টাল: ধীরগতি সক্রিয়!', '❄️');
+    }
+  }
+
+  /**
+   * পাওয়ার-আপের সময়সীমা পর্যবেক্ষণ ও সমাপ্তি
+   */
+  updatePowerupTimer(now) {
+    if (!this.activePowerup) return;
+
+    const elapsed = now - this.activePowerup.startTime;
+    const remaining = 1 - (elapsed / this.activePowerup.duration);
+
+    if (remaining <= 0) {
+      // পাওয়ার শেষ
+      if (this.activePowerup.type === 'speed') {
+        this.snake.isSpeedBoosted = false;
+        this.currentSpeed = this.baseSpeed;
+      } else if (this.activePowerup.type === 'ghost') {
+        this.snake.isGhost = false;
+      } else if (this.activePowerup.type === 'slow') {
+        this.snake.isSlowed = false;
+        this.currentSpeed = this.baseSpeed;
+      }
+
+      this.activePowerup = null;
+      this.hidePowerupBar();
+    } else {
+      this.powerupProgressFill.style.width = `${remaining * 100}%`;
+    }
+  }
+
+  showPowerupBar(title, icon) {
+    this.powerupTitle.textContent = title;
+    this.powerupIcon.textContent = icon;
+    this.powerupBarContainer.classList.remove('hidden');
+  }
+
+  hidePowerupBar() {
+    this.powerupBarContainer.classList.add('hidden');
+  }
+
+  /**
+   * স্কোর বৃদ্ধি ও অ্যানিমেশন
+   */
+  addScore(pts) {
+    this.score += pts;
+    this.scoreIncrement.textContent = `+${pts}`;
+    this.scoreIncrement.classList.remove('animate');
+    void this.scoreIncrement.offsetWidth; // রিফ্লো ট্রিগার
+    this.scoreIncrement.classList.add('animate');
+
+    if (this.score >= 100) {
+      this.unlockAchievement('centurion', 'সেঞ্চুরিয়ন: ১০০ পয়েন্টের গৌরব অর্জন!');
+    }
+    if (this.score >= 500) {
+      this.unlockAchievement('arcade_champion', 'আর্কিড চ্যাম্পিয়ন: ৫০০ পয়েন্টের মহান রেকর্ড!');
+    }
+
+    if (this.score > this.highscore) {
+      this.highscore = this.score;
+      localStorage.setItem('neon_snake_highscore', this.highscore);
+    }
+  }
+
+  /**
+   * ক্যাম্পেইন মোডে পরবর্তী লেভেলে উত্তীর্ণ হওয়া
+   */
+  levelUp() {
+    this.level++;
+    this.levelDisplay.textContent = `LVL ${this.level}`;
+    window.arcadeAudio.playLevelUp();
+    window.screenShake.trigger(10, 400);
+
+    // গতি সামান্য বৃদ্ধি
+    this.baseSpeed = Math.max(45, this.baseSpeed - 8);
+    this.currentSpeed = this.baseSpeed;
+
+    this.generateLevelObstacles(this.level);
+  }
+
+  /**
+   * গেম সমাপ্তি (Game Over)
+   */
+  gameOver(reason) {
+    this.state = 'GAMEOVER';
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+
+    window.arcadeAudio.playDie();
+    window.screenShake.trigger(16, 500);
+
+    // সাপের কণা বিস্ফোরণ
+    window.particleSystem.createDeathBurst(this.snake.body, this.themeColors.head);
+
+    // খেলার সময় হিসাব
+    const durationSeconds = Math.floor((performance.now() - this.gameStartTime) / 1000);
+    const mins = Math.floor(durationSeconds / 60).toString().padStart(2, '0');
+    const secs = (durationSeconds % 60).toString().padStart(2, '0');
+
+    // UI তে বিবরণ প্রদর্শন
+    this.finalScore.textContent = this.score;
+    this.finalLength.textContent = this.snake.body.length;
+    this.finalTime.textContent = `${mins}:${secs}`;
+    this.gameoverReason.textContent = reason;
+
+    if (this.score >= this.highscore && this.score > 0) {
+      this.newHighscoreBadge.classList.remove('hidden');
+    } else {
+      this.newHighscoreBadge.classList.add('hidden');
+    }
+
+    this.updateHighscoreUI();
+    this.overlayGameover.classList.remove('hidden');
+  }
+
+  /**
+   * ক্যানভাস রেন্ডারিং মেথড
+   */
+  render() {
+    this.ctx.save();
+
+    // স্ক্রিন শেক অফসেট প্রয়োগ
+    window.screenShake.apply(this.ctx);
+
+    // ক্যানভাস ব্যাকগ্রাউন্ড পরিষ্কার করা
+    this.ctx.fillStyle = this.themeColors.canvasBg;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // মৃদু ব্যাকগ্রাউন্ড গ্রিড লাইন
+    this.drawBackgroundGrid();
+
+    // পোর্টালসমূহ আঁকা
+    this.drawPortals();
+
+    // অবস্ট্যাকল (দেয়াল) আঁকা
+    this.drawObstacles();
+
+    // খাদ্য আঁকা
+    this.foodManager.draw(this.ctx);
+
+    // সাপ আঁকা
+    this.snake.draw(this.ctx, this.themeColors);
+
+    // পার্টিকেল আঁকা
+    window.particleSystem.draw(this.ctx);
+
+    this.ctx.restore();
+  }
+
+  /**
+   * ব্যাকগ্রাউন্ড সাবটেল গ্রিড
+   */
+  drawBackgroundGrid() {
+    this.ctx.save();
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    this.ctx.lineWidth = 1;
+
+    for (let x = 0; x <= this.gridWidth; x++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x * this.cellSize, 0);
+      this.ctx.lineTo(x * this.cellSize, this.gridHeight * this.cellSize);
+      this.ctx.stroke();
+    }
+    for (let y = 0; y <= this.gridHeight; y++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, y * this.cellSize);
+      this.ctx.lineTo(this.gridWidth * this.cellSize, y * this.cellSize);
+      this.ctx.stroke();
+    }
+    this.ctx.restore();
+  }
+
+  /**
+   * পোর্টালসমূহ রেন্ডার করা
+   */
+  drawPortals() {
+    if (this.currentMode !== 'portals') return;
+    this.portals.forEach(portal => {
+      this.drawSinglePortal(portal.in.x, portal.in.y, portal.colorIn);
+      this.drawSinglePortal(portal.out.x, portal.out.y, portal.colorOut);
+    });
+  }
+
+  drawSinglePortal(gx, gy, color) {
+    const cx = gx * this.cellSize + this.cellSize / 2;
+    const cy = gy * this.cellSize + this.cellSize / 2;
+    const radius = this.cellSize / 2 - 2;
+
+    this.ctx.save();
+    this.ctx.shadowBlur = 12;
+    this.ctx.shadowColor = color;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 3;
+
+    this.ctx.beginPath();
+    this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    this.ctx.stroke();
+
+    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    this.ctx.beginPath();
+    this.ctx.arc(cx, cy, radius * 0.5, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    this.ctx.restore();
+  }
+
+  /**
+   * অবস্ট্যাকল (বাধা দেয়াল) রেন্ডার করা
+   */
+  drawObstacles() {
+    if (this.obstacles.length === 0) return;
+
+    this.ctx.save();
+    this.ctx.fillStyle = '#475569';
+    this.ctx.shadowBlur = 8;
+    this.ctx.shadowColor = '#64748b';
+
+    this.obstacles.forEach(obs => {
+      const px = obs.x * this.cellSize;
+      const py = obs.y * this.cellSize;
+
+      this.ctx.fillRect(px + 2, py + 2, this.cellSize - 4, this.cellSize - 4);
+
+      // থ্রিডি বেভেল বর্ডার
+      this.ctx.strokeStyle = '#94a3b8';
+      this.ctx.lineWidth = 1.5;
+      this.ctx.strokeRect(px + 2, py + 2, this.cellSize - 4, this.cellSize - 4);
+    });
+
+    this.ctx.restore();
+  }
+
+  /**
+   * প্রাথমিক ক্যানভাস প্রদর্শন (গেম শুরুর আগের স্ট্যাটিক স্ক্রিন)
+   */
+  renderInitialScreen() {
+    this.themeColors = this.getThemeColors();
+    this.render();
+  }
+
+  /**
+   * অর্জন আনলক করা ও টোস্ট দেখানো
+   */
+  unlockAchievement(id, title) {
+    if (this.unlockedAchievements.includes(id)) return;
+
+    this.unlockedAchievements.push(id);
+    localStorage.setItem('neon_snake_achievements', JSON.stringify(this.unlockedAchievements));
+
+    const toast = document.getElementById('achievement-toast');
+    const desc = document.getElementById('achievement-desc');
+    desc.textContent = title;
+
+    toast.classList.remove('hidden');
+    window.arcadeAudio.playLevelUp();
+
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 4000);
+  }
+
+  /**
+   * স্কোরবোর্ড UI আপডেট
+   */
+  updateScoreUI() {
+    this.scoreDisplay.textContent = this.score;
+    this.foodCountDisplay.textContent = `${this.foodEaten} 🍎`;
+    this.updateHighscoreUI();
+  }
+
+  updateHighscoreUI() {
+    this.highscoreDisplay.textContent = this.highscore;
+  }
+
+  /**
+   * সাউন্ড মিউট/আনমিউট হ্যান্ডলার
+   */
+  toggleSound() {
+    const isMuted = window.arcadeAudio.toggleMute();
+    const iconOn = this.btnSound.querySelector('.icon-sound-on');
+    const iconOff = this.btnSound.querySelector('.icon-sound-off');
+
+    if (isMuted) {
+      iconOn.classList.add('hidden');
+      iconOff.classList.remove('hidden');
+    } else {
+      iconOn.classList.remove('hidden');
+      iconOff.classList.add('hidden');
+    }
+  }
+
+  /**
+   * থিম পরিবর্তন
+   */
+  changeTheme(newTheme) {
+    document.body.dataset.theme = newTheme;
+    localStorage.setItem('neon_snake_theme', newTheme);
+    this.themeColors = this.getThemeColors();
+    window.arcadeAudio.playClick();
+    this.render();
+  }
+
+  loadSavedTheme() {
+    const savedTheme = localStorage.getItem('neon_snake_theme');
+    if (savedTheme) {
+      this.themeSelect.value = savedTheme;
+      document.body.dataset.theme = savedTheme;
+      this.themeColors = this.getThemeColors();
+    }
+  }
+
+  /**
+   * ফুলস্ক্রিন টগল
+   */
+  toggleFullscreen() {
+    window.arcadeAudio.playClick();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  }
+
+  /**
+   * স্কোর শেয়ারিং (Web Share API বা ক্লিপবোর্ডে কপি)
+   */
+  shareScore() {
+    const shareText = `🐍 আমি নিয়ন স্নেক গেমে ${this.score} পয়েন্ট স্কোর করেছি! আপনি কি আমার এই রেকর্ড ভাঙতে পারবেন?`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'নিয়ন স্নেক গেম রেকর্ড',
+        text: shareText,
+        url: window.location.href
+      }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(shareText);
+      alert('স্কোর ক্লিপবোর্ডে কপি করা হয়েছে! বন্ধুদের সাথে শেয়ার করুন।');
+    }
+  }
 }
+
+// পৃষ্ঠা লোড সম্পন্ন হলে গেম চালু
+window.addEventListener('DOMContentLoaded', () => {
+  window.snakeGame = new NeonSnakeGame();
+});
