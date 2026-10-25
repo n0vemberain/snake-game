@@ -1,10 +1,16 @@
 # 🐍 Neon Snake - Modern Arcade Web Game
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Play%20Online-success?style=for-the-badge&logo=googlechrome&logoColor=white)](https://n0vemberain.github.io/snake-game/)
+[![GitHub Pages](https://img.shields.io/badge/Deployed%20with-GitHub%20Pages-181717?style=for-the-badge&logo=github)](https://n0vemberain.github.io/snake-game/)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-Synthesized-brightgreen?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+> 🌐 **Live Web Application URL:**  
+> **[https://n0vemberain.github.io/snake-game/](https://n0vemberain.github.io/snake-game/)**  
+> *(Click the link above to play directly in your browser on desktop or mobile)*
 
 A feature-rich, high-performance, cyberpunk-themed **Snake Game** built purely with modern web standards (HTML5, CSS3, and Vanilla JavaScript). Featuring real-time procedural 8-bit sound synthesis via the Web Audio API, a physics-based particle engine, 4 distinct game modes, 5 dynamic retro themes, interactive power-ups, and full mobile touch/gesture support.
 
