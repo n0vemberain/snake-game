@@ -1,4 +1,4 @@
-# 🐍 Neon Snake - Modern Arcade Web Game
+# Neon Snake - Modern Arcade Web Game
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Play%20Online-success?style=for-the-badge&logo=googlechrome&logoColor=white)](https://n0vemberain.github.io/snake-game/)
 [![GitHub Pages](https://img.shields.io/badge/Deployed%20with-GitHub%20Pages-181717?style=for-the-badge&logo=github)](https://n0vemberain.github.io/snake-game/)
@@ -8,15 +8,15 @@
 [![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-Synthesized-brightgreen?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-> 🌐 **Live Web Application URL:**  
+> **Live Web Application URL:**  
 > **[https://n0vemberain.github.io/snake-game/](https://n0vemberain.github.io/snake-game/)**  
 > *(Click the link above to play directly in your browser on desktop or mobile)*
 
-A feature-rich, high-performance, cyberpunk-themed **Snake Game** built purely with modern web standards (HTML5, CSS3, and Vanilla JavaScript). Featuring real-time procedural 8-bit sound synthesis via the Web Audio API, a physics-based particle engine, 4 distinct game modes, 5 dynamic retro themes, interactive power-ups, and full mobile touch/gesture support.
+A feature-rich, high-performance, cyberpunk-themed Snake Game built purely with modern web standards (HTML5, CSS3, and Vanilla JavaScript). Featuring real-time procedural 8-bit sound synthesis via the Web Audio API, a physics-based particle engine, 4 distinct game modes, 5 dynamic retro themes, interactive power-ups, and full mobile touch/gesture support.
 
 ---
 
-## 🎮 Game Modes
+## Game Modes
 
 1. **Classic Mode:** The timeless retro experience. Navigate the grid, devour apples, and grow your tail without crashing into borders or yourself.
 2. **Campaign / Levels:** Progressive challenge mode where each 5 foods eaten advances the level, accelerating snake speed and introducing complex obstacle walls and mazes.
@@ -25,41 +25,41 @@ A feature-rich, high-performance, cyberpunk-themed **Snake Game** built purely w
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🎨 5 Dynamic Arcade Themes
+### 5 Dynamic Arcade Themes
 Switch themes on the fly with real-time CSS variable hot-swapping:
-- ⚡ **Cyber Neon (Default):** Cyan and magenta futuristic cyberpunk palette with glowing neon accents.
-- 🌆 **Synthwave 80s:** Retro sunset gradient, magenta grids, and outrun aesthetics.
-- 👾 **Retro Gameboy:** Classic monochrome olive-green pixel screen nostalgia.
-- 💻 **The Matrix:** Green phosphor digital rain and hacker terminal aesthetics.
-- 🌙 **Midnight Dark:** Clean, distraction-free minimalist dark mode with indigo highlights.
+- **Cyber Neon (Default):** Cyan and magenta futuristic cyberpunk palette with glowing neon accents.
+- **Synthwave 80s:** Retro sunset gradient, magenta grids, and outrun aesthetics.
+- **Retro Gameboy:** Classic monochrome olive-green pixel screen nostalgia.
+- **The Matrix:** Green phosphor digital rain and hacker terminal aesthetics.
+- **Midnight Dark:** Clean, distraction-free minimalist dark mode with indigo highlights.
 
-### 🔊 Procedural Web Audio API Synthesizer
+### Procedural Web Audio API Synthesizer
 - **Zero external audio files:** No `.mp3` or `.wav` dependencies to download.
 - Real-time 8-bit sound synthesis using browser `OscillatorNode`, `GainNode`, and ADSR envelope curves.
 - Instant, zero-latency feedback for moves, apple bites, golden arpeggio fanfares, laser sweeps, crash explosions, and menu clicks.
 - Built-in audio state toggle (Mute/Unmute) with `localStorage` memory.
 
-### 🍎 Interactive Foods & Power-Ups
-- 🔴 **Regular Apple:** +10 points and +1 body segment.
-- 🌟 **Golden Star:** +50 bonus points; temporary spawn with circular countdown timer ring.
-- ⚡ **Speed Lightning:** 2x movement speed with active on-screen timer bar and bonus score multipliers.
-- 👻 **Ghost Berry:** Grants ethereal phasing mode for 7 seconds — pass through walls and your own tail harmlessly.
-- ❄️ **Ice Crystal:** Temporarily slows down the snake for precision maneuvers in tight grids.
+### Interactive Foods and Power-Ups
+- **Regular Apple:** +10 points and +1 body segment.
+- **Golden Star:** +50 bonus points; temporary spawn with circular countdown timer ring.
+- **Speed Lightning:** 2x movement speed with active on-screen timer bar and bonus score multipliers.
+- **Ghost Berry:** Grants ethereal phasing mode for 7 seconds — pass through walls and your own tail harmlessly.
+- **Ice Crystal:** Temporarily slows down the snake for precision maneuvers in tight grids.
 
-### 💥 Particle Physics & Screen Shake
+### Particle Physics and Screen Shake
 - **Particle Bursts:** Dynamic sparks, stars, and electrical arcs burst upon consuming different food types.
 - **Death Explosion:** Multi-segment fragment explosion upon collision.
 - **Tactile Screen Shake:** Decaying camera shake on crashes, level-ups, and special power-ups for authentic arcade impact.
 - **Motion Trail:** Subtle neon glow trail following the snake's head during rapid movement.
 
-### 📱 Full Mobile & Touch Support
+### Full Mobile and Touch Support
 - Fully responsive layout adapting across smartphones, tablets, and desktop displays.
 - Dedicated virtual **Touch D-Pad** and action buttons.
 - Intuitive **Touch Swipe Gestures** directly on the canvas arena.
 
-### 🏆 Achievements & Record Tracking
+### Achievements and Record Tracking
 - Persistent **High Score** saved automatically in browser `localStorage`.
 - Animated score increments with floating popups.
 - 8 unique unlockable achievement badges with toast notification banners:
@@ -75,23 +75,23 @@ Switch themes on the fly with real-time CSS variable hot-swapping:
 
 ---
 
-## 🕹️ Controls Guide
+## Controls Guide
 
 | Action | Keyboard Key | Mobile / Touch Device |
 | :--- | :--- | :--- |
-| **Move Up** | `W` or `↑` (Arrow Up) | Touch D-Pad `▲` or Swipe Up |
-| **Move Down** | `S` or `↓` (Arrow Down) | Touch D-Pad `▼` or Swipe Down |
-| **Move Left** | `A` or `←` (Arrow Left) | Touch D-Pad `◀` or Swipe Left |
-| **Move Right** | `D` or `→` (Arrow Right) | Touch D-Pad `▶` or Swipe Right |
-| **Pause / Resume** | `SPACE` | On-screen `⏸️` button |
-| **Restart Game** | `R` key | On-screen `🔄` button |
-| **Toggle Mute** | `M` key | Header `🔊` icon button |
-| **How to Play** | `?` key | Header `❓` icon button |
-| **Fullscreen** | Click `⛶` button | Click `⛶` button |
+| **Move Up** | `W` or `↑` (Arrow Up) | Touch D-Pad Up or Swipe Up |
+| **Move Down** | `S` or `↓` (Arrow Down) | Touch D-Pad Down or Swipe Down |
+| **Move Left** | `A` or `←` (Arrow Left) | Touch D-Pad Left or Swipe Left |
+| **Move Right** | `D` or `→` (Arrow Right) | Touch D-Pad Right or Swipe Right |
+| **Pause / Resume** | `SPACE` | On-screen Pause button |
+| **Restart Game** | `R` key | On-screen Restart button |
+| **Toggle Mute** | `M` key | Header Sound icon button |
+| **How to Play** | `?` key | Header Help icon button |
+| **Fullscreen** | Click Fullscreen button | Click Fullscreen button |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 Snake game/
@@ -107,7 +107,7 @@ Snake game/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 No installations or build steps required. The game runs directly in any modern web browser.
 
@@ -130,7 +130,7 @@ npx serve
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 - **Markup:** HTML5 Canvas, `<dialog>`, semantic tags, and ARIA attributes
 - **Styling:** CSS3 Custom Properties (Variables), Flexbox, CSS Grid, Glassmorphism backdrop-filters, Keyframe animations
 - **Programming Language:** Vanilla ECMAScript (ES6+) Class-based architecture
@@ -140,5 +140,5 @@ npx serve
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the terms of the [MIT License](LICENSE). Free for personal, educational, and commercial use.
